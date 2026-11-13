@@ -24,7 +24,7 @@ Attached in the `/policies` folder are some sample terraform files that enforce 
 
 # AWS SCP Threat Model
 
-Project: SCP guardrails for AWS member accounts (`policies/` folder: four Terraform SCPs).
+Project: SCP guardrails for AWS member accounts (`/policies` folder: four Terraform SCPs).
 
 > AI was used to create the structure for the threat model. It was not used to formulate the answers.
 
