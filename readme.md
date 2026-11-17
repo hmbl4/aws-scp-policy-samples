@@ -5,7 +5,6 @@ Attached in the `/policies` folder are some sample terraform files that enforce 
 
 - **block-public-s3-buckets.tf** - Blocks the ability for S3 buckets to be made public. 
 - **cloudtrail-disable.tf** - Prevents Cloudtrail from being disabled. 
-- **iam-no-actions-without-mfa.tf** - Prevents actions in an account unless the user has configured and enabled MFA.
 - **regions-disable.tf** - Prevents actions outside of defined regions, in this example `ap-southeast-2` (Sydney). 
 
 
@@ -16,7 +15,6 @@ Attached in the `/policies` folder are some sample terraform files that enforce 
 ├── policies
 │   ├── block-public-s3-buckets.tf
 │   ├── cloudtrail-disable.tf
-│   ├── iam-no-actions-without-mfa.tf
 │   └── regions-disable.tf
 ├── readme.md
 └── terraform.tfvars
@@ -24,19 +22,15 @@ Attached in the `/policies` folder are some sample terraform files that enforce 
 
 # AWS SCP Threat Model
 
-Project: SCP guardrails for AWS member accounts (`/policies` folder: four Terraform SCPs).
-
-> AI was used to create the structure for the threat model. It was not used to formulate the answers.
+Project: SCP guardrails for AWS member accounts (`/policies` folder: three Terraform SCPs).
 
 ## Scope and asset
 
 | Field | Notes |
 | --- | --- |
 | Primary asset | Employee records (PII) stored in S3 buckets |
-| Worst-case outcome | Data copied out of the organisation |
-| Bucket exposure | Public bucket (anonymous internet access) and bucket reachable only from inside the account (authenticated principals with stolen or misused credentials) |
-| Adversaries to consider | Stolen access key, phished console user, insider, well-meaning engineer, high-privilege attacker |
-| Assumptions |  |
+| Worst-case outcome | Data exfiltration |
+| Adversaries to consider | Stolen access keys, phished console user, insider threat, well-meaning engineer, high-privilege attacker |
 
 ## 1. block-public-s3-buckets.tf
 
@@ -57,7 +51,7 @@ Project: SCP guardrails for AWS member accounts (`/policies` folder: four Terraf
 | What it blocks | Disabling CloudTrail |
 | Principals in scope | All principals in the AWS account, no exceptions |
 | Attacker outcome it prevents | Prevents an authenticated principal from stopping or deleting cloud trail logs.  |
-| Attack stage interrupted | Evade defence - an attacker preparing to perform malicious activities of an account, could disable logging services as a precursor so that logs are not recorded.  |
+| Attack stage interrupted | Evade defence - an attacker preparing to perform malicious activities of an account, could disable logging services as a precursor so that logs are not recorded. |
 | What gets past it | Root account privileges can still be bypassed. Principals can still update the CT configuration, e.g. the  `UpdateTrail` Action. |
 Gaps / acceptable risk | Root account credentials can still disable cloud trail.  |
 | Verification test | Run a test from an inscope authenticated principal.  |
@@ -66,9 +60,9 @@ Gaps / acceptable risk | Root account credentials can still disable cloud trail.
 
 | Field | Notes |
 | --- | --- |
-| What it blocks | If an organisation and/or customer base is concentrated in one location, we'd look to block actions outside ap-southeast-2 (Sydney). The control prevents users from accessing non-global services in any other region apart from ap-southeast-2. |
+| What it blocks | If an organisation and customer base is concentrated in one location, we'd look to block actions outside ap-southeast-2 (Sydney). The control prevents users from accessing non-global services in any other region apart from ap-southeast-2. |
 | Principals in scope | All principals in the AWS account, no exceptions  |
 | Attacker outcome it prevents | Prevents attackers from spinning up infrastructure from other regions where monitoring may not be robust. |
 | Attack stage interrupted | Evading further creation, deletion, changes of infrastructure to all regions outside Sydney. |
-| What gets past it | Anyone doing actions in the root account, unlikely, but should be accounted for. Any resources that were previously running will also continue to run, this SCP doesn't stop them. |
-| Verification test | Run a test from an inscope authenticated principal in a different region.  |
+| What gets past it | Anyone doing actions in the root account. Any resources that were previously running will also continue to run, this SCP doesn't stop them. |
+| Verification test | Run a test from an in-scope authenticated principal in a different region. |
