@@ -59,32 +59,16 @@ Project: SCP guardrails for AWS member accounts (`/policies` folder: four Terraf
 | Attacker outcome it prevents | Prevents an authenticated principal from stopping or deleting cloud trail logs.  |
 | Attack stage interrupted | Evade defence - an attacker preparing to perform malicious activities of an account, could disable logging services as a precursor so that logs are not recorded.  |
 | What gets past it | Root account privileges can still be bypassed. Principals can still update the CT configuration, e.g. the  `UpdateTrail` Action. |
-| \
 Gaps / acceptable risk | Root account credentials can still disable cloud trail.  |
 | Verification test | Run a test from an inscope authenticated principal.  |
 
-## 3. iam-no-actions-without-mfa.tf
+## 3. regions-disable.tf
 
 | Field | Notes |
 | --- | --- |
-| What it blocks | Actions unless the user has MFA configured and enabled |
-| Principals in scope | All principals in the AWS account, no exceptions |
-| Attacker outcome it prevents | Use of AWS services in the account, without MFA configured on the current principals account.  |
-| Attack stage interrupted | Restricted actions can't be called. Will delay attacker from calling further commands.  |
-| What gets past it | An attacker can enrol their own MFA device, then enable the control |
-| Exempt actions to check | MFA enrolment actions. What else is exempt? Creation of access keys, changing passwords. |
-| Credential types covered | Console sessions: to confirm. Long-lived access keys: to confirm. |
-| Gaps / acceptable risk |  |
-| Verification test |  |
-
-## 4. regions-disable.tf
-
-| Field | Notes |
-| --- | --- |
-| What it blocks | Actions outside ap-southeast-2 (Sydney) |
-| Principals in scope |  |
-| Attacker outcome it prevents |  |
-| Attack stage interrupted |  |
-| What gets past it |  |
-| Gaps / acceptable risk |  |
-| Verification test |  |
+| What it blocks | If an organisation and/or customer base is concentrated in one location, we'd look to block actions outside ap-southeast-2 (Sydney). The control prevents users from accessing non-global services in any other region apart from ap-southeast-2. |
+| Principals in scope | All principals in the AWS account, no exceptions  |
+| Attacker outcome it prevents | Prevents attackers from spinning up infrastructure from other regions where monitoring may not be robust. |
+| Attack stage interrupted | Evading further creation, deletion, changes of infrastructure to all regions outside Sydney. |
+| What gets past it | Anyone doing actions in the root account, unlikely, but should be accounted for. Any resources that were previously running will also continue to run, this SCP doesn't stop them. |
+| Verification test | Run a test from an inscope authenticated principal in a different region.  |
